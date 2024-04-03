@@ -8,25 +8,25 @@ easy_table <- function(model_list,
   # Dependencies
   if (!requireNamespace("dplyr", quietly = TRUE)) {
     install.packages("dplyr")
-    library(dplyr)
   }
   if (!requireNamespace("flextable", quietly = TRUE)) {
     install.packages("flextable")
-    library(flextable)
   }
   if (!requireNamespace("lmtest", quietly = TRUE)) {
     install.packages("lmtest")
-    library(lmtest)
   }
   if (!requireNamespace("broom", quietly = TRUE)) {
     install.packages("broom")
-    library(broom)
+  }
+  if (!requireNamespace("sandwich", quietly = TRUE)) {
+    install.packages("sandwich")
   }
 
   require(broom)
   require(dplyr)
   require(lmtest)
   require(flextable)
+  require(sandwich)
 
   # Error messages
   if (!is.list(model_list) || is.null(names(model_list))) {
@@ -39,7 +39,7 @@ easy_table <- function(model_list,
   parse_model <- function(model) {
     model_name <- deparse(substitute(model))
     if(robust.se == T){
-      m <- lmtest::coeftest(model, vcov = vcovHC(model, type = "HC"))
+      m <- lmtest::coeftest(model, vcov = sandwich::vcovHC(model, type = "HC"))
     } else {
       m <- model
     }
