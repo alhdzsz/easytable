@@ -115,11 +115,13 @@ easy_table <- function(model_list,
   mtable <- mtable[order(apply(mtable[, -1], 1, function(row) sum(row == "Y")), decreasing = F),]
 
   mmes <- mtable %>% filter(term %in% c("N", "R sq.", "Adj. R sq.", "AIC"))
+  mmes <- mmes[rowSums(mmes[-1] != "") > 0, ]
   mtable <- mtable %>% filter(!term %in% c("N", "R sq.", "Adj. R sq.", "AIC"))
   mtable <- bind_rows(mtable, mmes)
 
   ft <- flextable(mtable) %>%
-    add_footer_lines("Significance: ***p < .01; **p < .05; *p < .1 ")
+    add_footer_lines("Significance: ***p < .01; **p < .05; *p < .1 ") %>%
+    hline(j = 1:ncol(mtable), i = nrow(mtable)-nrow(mmes))
 
   if(highlight){
     for(i in 2:ncol(mtable)) {

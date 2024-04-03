@@ -5,7 +5,7 @@
 easy_table()
 }
 \description{
-Prints a regression table.
+Prints a regression table as a flextable object.
 }
 \examples{
 test <- lm(mpg ~ factor(cyl), data = mtcars)
@@ -25,6 +25,6 @@ easy_table(mymods,
       csv = "test",
       control.var = c("hp", "cyl", "am"),
       robust.se = T
-      ) %>%
+      ) |>
   flextable::width(j = 1, 5, "cm")
 }
