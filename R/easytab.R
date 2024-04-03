@@ -88,9 +88,7 @@ easy_table <- function(model_list,
   }
 
   for (col in names(mtable)[-1]) {
-    # Identify rows where the term is in the control variable list and not NA
     replace_indices <- mtable$term %in% control.var & !is.na(mtable[[col]])
-    # Replace values with "Y" in the identified rows
     mtable[replace_indices, col] <- "Y"
   }
 
