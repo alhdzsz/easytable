@@ -5,6 +5,7 @@ easy_table <- function(model_list,
                        control.var = NULL,
                        highlight = F) {
 
+  # Dependencies
   if (!requireNamespace("dplyr", quietly = TRUE)) {
     install.packages("dplyr")
     library(dplyr)
@@ -22,16 +23,12 @@ easy_table <- function(model_list,
     library(broom)
   }
 
-  if (!is.list(model_list)) {
-    print("Input is not a named list")
-    return(FALSE)
+  # Error messages
+  if (!is.list(model_list) || is.null(names(model_list))) {
+    stop("Input must be a named list of models. Each element of the list should be a regression model.")
   }
 
-  if (is.null(names(model_list))) {
-    print("Input is not a named list")
-    return(FALSE)
-  }
-
+  # Function
   mnames <- names(model_list)
 
   parse_model <- function(model) {
