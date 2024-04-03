@@ -5,10 +5,22 @@ easy_table <- function(model_list,
                        control.var = NULL,
                        highlight = F) {
 
-  require(dplyr)
-  require(flextable)
-  require(lmtest)
-  require(broom)
+  if (!requireNamespace("dplyr", quietly = TRUE)) {
+    install.packages("dplyr")
+    library(dplyr)
+  }
+  if (!requireNamespace("flextable", quietly = TRUE)) {
+    install.packages("flextable")
+    library(flextable)
+  }
+  if (!requireNamespace("lmtest", quietly = TRUE)) {
+    install.packages("lmtest")
+    library(lmtest)
+  }
+  if (!requireNamespace("broom", quietly = TRUE)) {
+    install.packages("broom")
+    library(broom)
+  }
 
   if (!is.list(model_list)) {
     print("Input is not a named list")
