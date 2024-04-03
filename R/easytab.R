@@ -23,6 +23,11 @@ easy_table <- function(model_list,
     library(broom)
   }
 
+  require(broom)
+  require(dplyr)
+  require(lmtest)
+  require(flextable)
+
   # Error messages
   if (!is.list(model_list) || is.null(names(model_list))) {
     stop("Input must be a named list of models. Each element of the list should be a regression model.")
@@ -34,7 +39,7 @@ easy_table <- function(model_list,
   parse_model <- function(model) {
     model_name <- deparse(substitute(model))
     if(robust.se == T){
-      m <- coeftest(model, vcov = vcovHC(model, type = "HC"))
+      m <- lmtest::coeftest(model, vcov = vcovHC(model, type = "HC"))
     } else {
       m <- model
     }
