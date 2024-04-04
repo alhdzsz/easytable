@@ -3,9 +3,13 @@ easy_table <- function(model_list,
                        csv = NULL,
                        robust.se = F,
                        control.var = NULL,
+                       margins = F,
                        highlight = F) {
 
   # Dependencies
+  if (!requireNamespace("margins", quietly = TRUE)) {
+    install.packages("margins")
+  }
   if (!requireNamespace("dplyr", quietly = TRUE)) {
     install.packages("dplyr")
   }
@@ -27,10 +31,11 @@ easy_table <- function(model_list,
   require(lmtest)
   require(flextable)
   require(sandwich)
+  require(margins)
 
   # Error messages
   if (!is.list(model_list) || is.null(names(model_list))) {
-    stop("Input must be a named list of models. Each element of the list should be a regression model.")
+    stop("Input must be a named list of models. Each element of the list must be a statistical model object.")
   }
 
   # Function
@@ -38,13 +43,28 @@ easy_table <- function(model_list,
 
   parse_model <- function(model) {
     model_name <- deparse(substitute(model))
-    if(robust.se == T){
-      m <- lmtest::coeftest(model, vcov = sandwich::vcovHC(model, type = "HC"))
-    } else {
-      m <- model
+
+    if(robust.se == T & margins == F){
+      m <- lmtest::coeftest(model, vcov = sandwich::vcovHC(model, type = "HC")) %>% tidy()
     }
+    if(robust.se == F & margins == T){
+      m <- margins::margins(model) %>% tidy()
+    }
+    if(robust.se == T & margins == T){
+      m1 <- lmtest::coeftest(model, vcov = sandwich::vcovHC(model, type = "HC")) %>%
+        tidy() %>%
+        filter(term != "(Intercept)") %>%
+        select(-estimate)
+      m2 <- margins::margins(model) %>%
+        tidy() %>%
+        select(term, estimate)
+      m <- left_join(m1,m2)
+    }
+    if(robust.se == F & margins == F){
+      m <- model %>% tidy()
+    }
+
     mod.df <- m %>%
-      tidy() %>%
       select(term, estimate, std.error, p.value) %>%
       mutate(
         significance = case_when(
@@ -122,6 +142,19 @@ easy_table <- function(model_list,
   ft <- flextable(mtable) %>%
     add_footer_lines("Significance: ***p < .01; **p < .05; *p < .1 ") %>%
     hline(j = 1:ncol(mtable), i = nrow(mtable)-nrow(mmes))
+
+  if(robust.se == T & margins == F){
+    ft <- ft %>%
+      add_footer_lines("Note: Robust Standard Errors")
+  }
+  if(robust.se == F & margins == T){
+    ft <- ft %>%
+      add_footer_lines("Note: Marginal Effects")
+  }
+  if(robust.se == T & margins == T){
+    ft <- ft %>%
+      add_footer_lines("Note: Marginal Effects and Robust Standard Errors")
+  }
 
   if(highlight){
     for(i in 2:ncol(mtable)) {
