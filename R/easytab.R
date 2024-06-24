@@ -7,8 +7,8 @@ easy_table <- function(model_list,
                        highlight = F) {
 
   # Dependencies
-  if (!requireNamespace("marginaleffects", quietly = TRUE)) {
-    install.packages("marginaleffects")
+  if (!requireNamespace("margins", quietly = TRUE)) {
+    install.packages("margins")
   }
   if (!requireNamespace("dplyr", quietly = TRUE)) {
     install.packages("dplyr")
@@ -31,7 +31,7 @@ easy_table <- function(model_list,
   require(lmtest)
   require(flextable)
   require(sandwich)
-  require(marginaleffects)
+  require(margins)
 
   # Error messages
   if (!is.list(model_list) || is.null(names(model_list))) {
@@ -48,14 +48,14 @@ easy_table <- function(model_list,
       m <- lmtest::coeftest(model, vcov = sandwich::vcovHC(model, type = "HC")) %>% tidy()
     }
     if(robust.se == F & margins == T){
-      m <- marginaleffects::marginaleffects(model) %>% tidy()
+      m <- margins::margins(model) %>% tidy()
     }
     if(robust.se == T & margins == T){
       m1 <- lmtest::coeftest(model, vcov = sandwich::vcovHC(model, type = "HC")) %>%
         tidy() %>%
         filter(term != "(Intercept)") %>%
         select(-estimate)
-      m2 <- marginaleffects::marginaleffects(model) %>%
+      m2 <- margins::margins(model) %>%
         tidy() %>%
         select(term, estimate)
       m <- left_join(m1,m2)
